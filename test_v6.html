@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Raman Database and Literature</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1.5.10/css/pico.min.css">
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.css">
+		<script src="https://cdn.jsdelivr.net/npm/nouislider@15.7.0/dist/nouislider.min.js"></script>
+	<style>
+		#biomoleculeOptions, #specificationOptions {
+			margin-top: 4em;
+		}
+		/* Reduce noUiSlider bar height to 30% of default */
+		.noUi-target {
+			height: 0.3em !important;
+			border: none !important;
+			box-shadow: none !important;
+			background: #fff !important;
+		}
+		.noUi-connect, .noUi-base {
+			height: 100% !important;
+			position: absolute;
+			top: 0;
+			left: 0;
+			transform: none;
+		}
+		/* Custom triangle handles for noUiSlider */
+		.noUi-handle {
+			width: 1.6em !important;
+			height: 1.12em !important;
+			top: -0.58em !important;
+			background: transparent !important;
+			border: none !important;
+			box-shadow: none !important;
+			cursor: pointer;
+			outline: none !important;
+		}
+		.noUi-handle:before {
+			content: '';
+			display: block;
+			width: 1.2em;
+			height: 0.84em;
+			margin: 0em auto;
+			background: none;
+			clip-path: polygon(20% 0%, 80% 0%, 50% 100%);
+			background-color: #666;
+			transition: transform 0.2s;
+		}
+		.noUi-handle:after {
+			content: none !important;
+			display: none !important;
+		}
+		.noUi-handle-lower:before {
+			transform: rotate(-90deg);
+			margin-left: -0.9em;
+		}
+		.noUi-handle-upper:before {
+			transform: rotate(90deg);
+			margin-left: -0.2em;
+		}
+		/* Move noUiSlider tooltips below the slider */
+		.noUi-tooltip {
+			top: 36px !important;
+			bottom: auto !important;
+			background: #222;
+			color: #fff;
+			border-radius: 4px;
+			font-size: 1em;
+			padding: 0.2em 0.7em;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+		}
+		/* Remove all vertical lines and artifacts from noUiSlider */
+		.noUi-origin {
+			background: transparent !important;
+			border: none !important;
+			box-shadow: none !important;
+		}
+		.noUi-marker, .noUi-marker-large { background: transparent !important; }
+		.noUi-value, .noUi-value-large { display: none !important; }
+		.noUi-pips { display: none !important; }
+		.noUi-base::before, .noUi-base::after,
+		.noUi-target::before, .noUi-target::after,
+		.noUi-origin::before, .noUi-origin::after { display: none !important; }
+		.noUi-connect {
+			border-left: none !important;
+			border-right: none !important;
+		}
+
+		/* Table styling for PDF export (PRINT ONLY) */
+		@media print {
+			table { border-collapse: collapse; }
+			th, td { border: 1px solid #888 !important; padding: 0.5em; }
+		}
+		/* On-screen: no table cell outlines */
+		@media screen {
+			table, th, td { border: none !important; }
+		}
+
+		/* Accelerate theme transitions for specific elements only */
+		#searchInput, #downloadBtn, #clearSearch, #themeToggle {
+			transition: color 0.05s ease, background-color 0.05s ease !important;
+		}
+	</style>
+	<style>
+		/* Lit# column */
+		th.lit-col, td.lit-col {
+			min-width: 10em;
+			white-space: nowrap;
+		}
+	</style>
+	<style>
+		@media screen {
+			/* Intensity: 1st visible column */
+			#tableContainer table th:nth-child(1),
+			#tableContainer table td:nth-child(1) {
+				padding-left: 0.25em !important;
+				padding-right: 0.25em !important;
+			}
+			/* Lit# (7) */
+			#tableContainer table th:nth-child(7),
+			#tableContainer table td:nth-child(7) { white-space: nowrap; }
+		}
+	</style>
+
+	<!-- Inter font -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+	<style>
+		:root {
+			font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+			--accent: #9BC09C;
+			--accent2: #511d43;
+		}
+		html, body { font-family: inherit; }
+
+		a, a:visited { color: var(--accent) !important; }
+		a:hover, a:focus { color: var(--accent) !important; text-decoration-color: var(--accent) !important; }
+
+		#searchBtn {
+			background: var(--accent) !important;
+			border: 1px solid var(--accent) !important;
+			color: #fff !important;
+		}
+	</style>
+
+	<style>
+		/* Header row styling (screen) */
+		@media screen {
+			#tableContainer table {
+				border-collapse: separate !important;
+				border-spacing: 0.45em 0.05em;
+				table-layout: fixed;
+				width: max-content;
+				min-width: 100%;
+			}
+			#tableContainer table th {
+				background: transparent !important;
+				padding: 0 !important;
+				position: relative;
+			}
+			#tableContainer table th .th-pill {
+				display: block;
+				width: 100%;
+				box-sizing: border-box;
+				text-align: inherit;
+				background: var(--accent2);
+				color: #fff;
+				border-radius: 0.6em;
+				padding: 0.5em 0.7em;
+				line-height: 1.1;
+				background-clip: padding-box;
+				text-transform: capitalize;
+				font-weight: 540;
+			}
+			#tableContainer table th .th-pill .header-flex {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.3em;
+				line-height: inherit;
+				width: 100%;
+			}
+			#tableContainer table th .th-pill .header-flex > button {
+				flex: 0 0 auto;
+				width: 1.2em !important;
+				height: 1.2em !important;
+				min-width: 1.2em !important;
+				min-height: 1.2em !important;
+				padding: 0 !important;
+				margin: 0 !important;
+				line-height: 1 !important;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+			}
+			#tableContainer table th .th-pill .header-flex > button svg {
+				display: block;
+				height: 1.05em;
+				width: 1.05em;
+			}
+		}
+	</style>
+	<!-- Stable column classes -->
+	<style>
+		.col-intensity { }
+		.col-wavenumber { }
+		.col-biomolecule { }
+		.col-specification { }
+		.col-component { }
+		.col-vibration { }
+		.col-literature {
+			white-space: nowrap;
+		}
+		.col-further1, .col-further2 {
+			display: table-cell !important;
+			white-space: normal;
+		}
+	</style>
+	<style>
+		@media screen {
+			/* Header-to-data gap */
+			#tableContainer table thead tr:first-child > th {
+				padding-bottom: 0.9em !important;
+			}
+			/* Align search row */
+			:root {
+				--intensity-col-width: 2.5em;
+				--table-col-gap-x: 0.45em;
+			}
+			#searchBarRow {
+				padding-left: var(--table-col-gap-x);
+				box-sizing: border-box;
+			}
+		}
+	</style>
+	<style>
+		/* Light mode */
+		html[data-theme="light"] {
+			--background-color: #eff5ef;
+			--pico-background-color: #eff5ef;
+			--pico-color: #000;
+			--pico-h1-color: #000; --pico-h2-color: #000; --pico-h3-color: #000;
+			--pico-h4-color: #000; --pico-h5-color: #000; --pico-h6-color: #000;
+			--pico-muted-color: #000;
+		}
+		html[data-theme="light"],
+		html[data-theme="light"] body {
+			background-color: #eff5ef !important;
+			color: #000 !important;
+		}
+		html[data-theme="light"] h1, html[data-theme="light"] h2, html[data-theme="light"] h3,
+		html[data-theme="light"] h4, html[data-theme="light"] h5, html[data-theme="light"] h6,
+		html[data-theme="light"] p, html[data-theme="light"] label, html[data-theme="light"] small,
+		html[data-theme="light"] li, html[data-theme="light"] th, html[data-theme="light"] td,
+		html[data-theme="light"] input, html[data-theme="light"] button,
+		html[data-theme="light"] select, html[data-theme="light"] textarea {
+			color: #000 !important;
+		}
+		html[data-theme="light"] #filterBtn { color: #fff !important; }
+		html[data-theme="light"] #filterBtn svg { stroke: #fff !important; }
+	</style>
+	<style>
+		/* Accent focus states */
+		#searchInput:focus, #searchInput:active {
+			border-color: var(--accent) !important;
+			outline: none !important;
+			box-shadow: 0 0 0 0.2rem rgba(155, 192, 156, 0.25) !important;
+		}
+		#searchBtn:focus, #searchBtn:active, #searchBtn:hover {
+			background: var(--accent) !important;
+			border-color: var(--accent) !important;
+			box-shadow: 0 0 0 0.2rem rgba(155, 192, 156, 0.25) !important;
+		}
+		.noUi-connect { background: var(--accent) !important; }
+		input[type="checkbox"]:checked {
+			background-color: var(--accent) !important;
+			border-color: var(--accent) !important;
+		}
+		input[type="checkbox"]:focus {
+			border-color: var(--accent) !important;
+			box-shadow: 0 0 0 0.2rem rgba(155, 192, 156, 0.25) !important;
+		}
+		#filterBtn:focus, #filterBtn:active, #filterBtn:hover {
+			background: var(--accent) !important;
+			box-shadow: 0 0 0 0.2rem rgba(155, 192, 156, 0.25) !important;
+		}
+	</style>
+	<!-- Download format dropdown -->
+	<style>
+		#downloadMenu {
+			display: none;
+			flex-direction: column;
+			justify-content: center;
+			align-items: stretch;
+			gap: 0.1em;
+			position: absolute;
+			top: 3em;
+			right: 1rem;
+			min-width: 10rem;
+			background: var(--background-color, #111);
+			border: 1px solid rgba(255,255,255,0.2);
+			border-radius: 0.35em;
+			box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+			padding: 0.25em;
+			z-index: 2000;
+		}
+		html[data-theme="light"] #downloadMenu {
+			background: #fff;
+			border-color: rgba(0,0,0,0.15);
+		}
+		#downloadMenu button {
+			width: 100%;
+			text-align: left;
+			background: transparent;
+			border: none;
+			padding: 0.3em 0.45em !important;
+			margin: 0 !important;
+			border-radius: 0.35em;
+			cursor: pointer;
+			color: inherit;
+			line-height: 1.2;
+			font-size: 0.95em;
+			box-sizing: border-box;
+		}
+		#downloadMenu button:hover {
+			background: rgba(155, 192, 156, 0.15);
+		}
+	</style>
+	<style>
+		html[data-theme="dark"] #filterMenu { background: #222 !important; color: #eee !important; }
+		html[data-theme="light"] #filterMenu { background: #fff !important; color: #222 !important; }
+	</style>
+	<!-- Sticky search bar and table header -->
+	<style>
+		#searchBarRow {
+			position: sticky;
+			top: 0;
+			z-index: 60;
+			padding-top: 0.5em;
+			padding-bottom: 0.5em;
+		}
+		html[data-theme="light"] #searchBarRow {
+			background: #eff5ef !important;
+		}
+		html[data-theme="dark"] #searchBarRow {
+			background: #11191f !important;
+		}
+		#tableContainer table thead {
+			position: sticky;
+			z-index: 50;
+		}
+		#tableContainer table thead th {
+			/* opaque background so content doesn't bleed through */
+		}
+		html[data-theme="light"] #tableContainer table thead th {
+			background: #eff5ef !important;
+		}
+		html[data-theme="dark"] #tableContainer table thead th {
+			background: #11191f !important;
+		}
+		/* Ensure the th-pill keeps its styling on top of the opaque background */
+		#tableContainer table thead th .th-pill {
+			position: relative;
+			z-index: 1;
+		}
+	</style>
+	<!-- Column resize handles -->
+	<style>
+		#tableContainer table td {
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+		#tableContainer table th {
+			position: relative;
+			overflow: visible;
+		}
+		.col-resize-handle {
+			position: absolute;
+			right: -5px;
+			top: 0;
+			bottom: 0;
+			width: 3px;
+			cursor: col-resize;
+			z-index: 20;
+			background: transparent;
+			user-select: none;
+			-webkit-user-select: none;
+		}
+		.col-resize-handle:hover,
+		.col-resize-handle.active {
+			background: var(--accent);
+			opacity: 0.5;
+			border-radius: 3px;
+		}
+		body.col-resizing {
+			cursor: col-resize !important;
+			user-select: none !important;
+			-webkit-user-select: none !important;
+		}
+		body.col-resizing * {
+			cursor: col-resize !important;
+		}
+	</style>
+</head>
+<body>
+	<nav style="position: absolute; top: 1rem; right: 1rem; z-index: 100;">
+		<button id="downloadBtn" title="Download" style="background: none; border: none; cursor: pointer; padding: 0.2em 0.5em; margin-right: 0.5em;">
+			<svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<line x1="14" y1="4" x2="14" y2="18"/>
+				<polyline points="8 14 14 20 20 14"/>
+				<line x1="6" y1="24" x2="22" y2="24"/>
+			</svg>
+		</button>
+		<div id="downloadMenu" role="menu" aria-label="Download options">
+			<button id="downloadPdfBtn" type="button" role="menuitem">Export as PDF</button>
+			<button id="downloadTxtBtn" type="button" role="menuitem">Export as TXT</button>
+		</div>
+		<button id="themeToggle" aria-label="Toggle dark mode" style="background: none; border: none; cursor: pointer; padding: 0;">
+			<span id="themeIcon">
+				<svg id="sunIcon" width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="14" cy="14" r="5"/>
+					<line x1="14" y1="2" x2="14" y2="6"/><line x1="14" y1="22" x2="14" y2="26"/>
+					<line x1="2" y1="14" x2="6" y2="14"/><line x1="22" y1="14" x2="26" y2="14"/>
+					<line x1="5.1" y1="5.1" x2="7.8" y2="7.8"/><line x1="20.2" y1="20.2" x2="22.9" y2="22.9"/>
+					<line x1="5.1" y1="22.9" x2="7.8" y2="20.2"/><line x1="20.2" y1="7.8" x2="22.9" y2="5.1"/>
+				</svg>
+				<svg id="moonIcon" width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+					<path d="M24 14A10 10 0 1 1 14 4c0 8 2.5 10 10 10z"/>
+				</svg>
+			</span>
+		</button>
+	</nav>
+	<h2>Raman Peak Literature Database </h2>
+
+	<div id="searchBarRow">
+		<label for="searchInput" style="display:none;"></label>
+		<div style="display: flex; align-items: center; width: 100%; position: relative;">
+			<div style="position: relative; width: 33%; min-width: 220px;">
+				<input type="text" id="searchInput" placeholder="Search Wavenumber or Category" autocomplete="off" style="width: 100%; padding-right: 2em;">
+				<button id="clearSearch" aria-label="Clear search" style="position: absolute; right: 0.5em; top: 50%; transform: translateY(-90%); background: none; border: none; cursor: pointer; padding: 0; width: 1.2em; height: 1.2em; display: flex; align-items: center; justify-content: center;">
+					<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="5" y1="5" x2="15" y2="15"/><line x1="15" y1="5" x2="5" y2="15"/>
+					</svg>
+				</button>
+			</div>
+			<button id="searchBtn" style="margin-left: 0.5em; font-size: 0.9em; padding: 0.2em 0.7em; min-width: 0; width: auto; white-space: nowrap; background: var(--accent); color: #fff; border: 1px solid var(--accent); border-radius: 0.3em;">Search</button>
+			<button id="filterBtn" style="margin-left: 0.5em; font-size: 0.9em; padding: 0.2em 0.7em; min-width: 0; width: auto; white-space: nowrap; background: var(--accent); color: #fff; border: none; border-radius: 0.3em; display: flex; align-items: center; gap: 0.3em;">
+				<span style="display: flex; align-items: center;">
+					<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><line x1="4" y1="21" x2="20" y2="21"/><line x1="8" y1="17" x2="16" y2="17"/><line x1="10" y1="13" x2="14" y2="13"/><line x1="12" y1="3" x2="12" y2="13"/></svg>
+				</span>
+				Filter
+			</button>
+			<div id="filterMenu" style="display:none; position:absolute; top:3.5em; right:2em; border:1px solid var(--accent); border-radius:0.5em; box-shadow:0 2px 12px rgba(25,118,210,0.15); padding:1em; z-index:1000; min-width:320px;">
+				<div style="margin-bottom:1em;">
+					<div id="wavenumberSliderContainer" style="margin-bottom:1em;">
+						<div id="wnSlider" style="margin: 1em 0;"></div>
+					</div>
+					<div id="biomoleculeOptions"></div>
+					<div id="specificationOptions"></div>
+				</div>
+			</div>
+		</div>
+		<ul id="autocompleteList" style="position: absolute; left: 0; top: 100%; width: 100%; border-radius: 0.25em; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10; list-style: none; margin: 0; padding: 0; display: none;"></ul>
+	</div>
+	<div id="searchResults"></div>
+	<div id="tableContainer"></div>
+	<script>
+
+	let allRows = [];
+	let litRows = [];
+	let beschreibungRows = [];
+	let beschreibungMap = {};
+	let autocompleteOptions = [];
+	let resolvedLitForPdf = []; // Stores [{num, citation, source, measurement}, ...] after async resolve
+	let currentLitSources = []; // Current render's literature sources (always in sync with displayed table)
+	let resolvedCitationsByDoi = {}; // Cache: doi -> resolved APA citation string
+
+	function normalizeDoi(doi) {
+		return (doi || '').trim().replace(/^https?:\/\/(dx\.)?doi\.org\//i, '');
+	}
+
+	function extractDoisFromRow(row) {
+		const cells = row.split('\t');
+		const dois = [];
+		for (const raw of cells) {
+			const s = (raw || '').trim();
+			if (!s) continue;
+			const parts = s.split(/[;,|]/g).map(p => p.trim()).filter(Boolean);
+			for (let part of parts) {
+				part = normalizeDoi(part);
+				if (/^10\.\d{4,9}\/\S+$/i.test(part) && !dois.includes(part)) dois.push(part);
+			}
+		}
+		return dois;
+	}
+
+	function normalizeDbRows(rows) {
+		if (!Array.isArray(rows) || rows.length === 0) return rows;
+		const stripBom = (s) => (s ?? '').toString().replace(/^\uFEFF/, '');
+		const isBlank = (line) => !stripBom(line).trim();
+		const isWnCell = (s) => {
+			const v = stripBom(s).trim().replace(/[–—]/g, '-').split('-')[0].trim();
+			return Number.isFinite(parseFloat(v));
+		};
+		let start = 0;
+		while (start < rows.length && isBlank(rows[start])) start++;
+		if (start >= rows.length) return [];
+		const header = stripBom(rows[start]);
+		const headerNorm = header.trim().toLowerCase();
+		let i = start + 1;
+		while (i < rows.length) {
+			if (isBlank(rows[i])) { i++; continue; }
+			const line = stripBom(rows[i]);
+			const norm = line.trim().toLowerCase();
+			if (norm === headerNorm) { i++; continue; }
+			const firstCell = (line.split('\t')[0] || '').trim();
+			if (isWnCell(firstCell)) break;
+			i++;
+		}
+		return [header, ...rows.slice(i).map(stripBom)];
+	}
+
+	function getWavenumberRange() {
+		if (!allRows || allRows.length <= 1) return { min: 0, max: 5000 };
+		const data = allRows.slice(1);
+		function parseWn(row) {
+			const v = parseFloat((row.split('\t')[0] || '').trim());
+			return Number.isFinite(v) ? v : null;
+		}
+		let min = null;
+		for (let i = 0; i < data.length; i++) { const v = parseWn(data[i]); if (v !== null) { min = v; break; } }
+		let max = null;
+		for (let i = data.length - 1; i >= 0; i--) { const v = parseWn(data[i]); if (v !== null) { max = v; break; } }
+		if (min === null || max === null) return { min: 0, max: 5000 };
+		return { min, max };
+	}
+
+	function getSortWavenumber(row) {
+		const cell = (row.split('\t')[0] || '').trim();
+		if (!cell) return Number.POSITIVE_INFINITY;
+		const norm = cell.replace(/[–—]/g, '-');
+		const left = norm.split('-')[0].trim();
+		const v = parseFloat(left);
+		return Number.isFinite(v) ? v : Number.POSITIVE_INFINITY;
+	}
+
+	function sortRowsByWavenumber(rows) {
+		if (!rows || rows.length <= 1) return rows;
+		const header = rows[0];
+		const data = rows.slice(1).slice().sort((a, b) => getSortWavenumber(a) - getSortWavenumber(b));
+		return [header, ...data];
+	}
+
+	function filterByBiomoleculeAndSpec() {
+		const checkedBiomols = new Set();
+		const checkedSpecs = new Set();
+		document.querySelectorAll('.biomol-group input[type="checkbox"][id^="bio_"]:checked').forEach(box => {
+			checkedBiomols.add(box.value);
+		});
+		document.querySelectorAll('.biomol-group .spec-list input[type="checkbox"][id^="spec_"]:checked').forEach(box => {
+			checkedSpecs.add(box.value);
+		});
+		let minWn = window.filterWnMin ?? getWavenumberRange().min;
+		let maxWn = window.filterWnMax ?? getWavenumberRange().max;
+		const header = allRows[0];
+		let filtered = allRows.slice(1).filter(row => {
+			const cells = row.split('\t');
+			const wn = parseFloat(cells[0]);
+			const biomol = cells[2]?.trim();
+			const spec = cells[3]?.trim();
+			if (isNaN(wn) || wn < minWn || wn > maxWn) return false;
+			if (!checkedBiomols.has(biomol)) return false;
+			if (spec && !checkedSpecs.has(spec)) return false;
+			return true;
+		});
+		renderTableAndLiterature([header, ...filtered], litRows);
+	}
+
+	const dbUrl = 'https://raw.githubusercontent.com/semabdemir/raman-newt/main/Raman%20peaks%20Datenbank_v3.txt';
+	const litUrl = 'https://raw.githubusercontent.com/semabdemir/raman-newt/main/Quellen_v2.txt';
+	const beschreibungUrl = 'https://raw.githubusercontent.com/semabdemir/raman-newt/refs/heads/main/Beschreibung.txt';
+
+	async function autoLoadFiles() {
+		try {
+			const [dbRes, litRes, beschreibungRes] = await Promise.all([
+				fetch(dbUrl), fetch(litUrl), fetch(beschreibungUrl)
+			]);
+			if (!dbRes.ok || !litRes.ok || !beschreibungRes.ok) throw new Error('Failed to fetch one or more files.');
+
+			async function responseToText(res) {
+				const buf = await res.arrayBuffer();
+				const bytes = new Uint8Array(buf);
+				if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) return new TextDecoder('utf-16le').decode(buf);
+				if (bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF) return new TextDecoder('utf-16be').decode(buf);
+				return new TextDecoder('utf-8').decode(buf);
+			}
+
+			const dbText = await responseToText(dbRes);
+			const litText = await responseToText(litRes);
+			const beschreibungText = await responseToText(beschreibungRes);
+
+			allRows = dbText.trim().split(/\r?\n/);
+			allRows = normalizeDbRows(allRows);
+			allRows = sortRowsByWavenumber(allRows);
+
+			litRows = litText.trim().split(/\r?\n/);
+			beschreibungRows = beschreibungText.trim().split(/\r?\n/);
+			beschreibungMap = {};
+			beschreibungRows.forEach(row => {
+				const cells = row.split('\t');
+				if (cells.length >= 2) {
+					let cleanKey = cells[0].replace(/[\x00-\x1F\u200B-\u200D\uFEFF]/g, '').trim();
+					let cleanVal = cells[1].replace(/[\x00-\x1F\u200B-\u200D\uFEFF]/g, '').trim();
+					beschreibungMap[cleanKey] = cleanVal;
+				}
+			});
+			const opts = new Set();
+			allRows.slice(1).forEach(row => {
+				const cells = row.split('\t');
+				[2,3,4].forEach(idx => { if (cells[idx] && cells[idx].trim()) opts.add(cells[idx].trim()); });
+			});
+			autocompleteOptions = Array.from(opts).sort();
+			delete window.filterWnMin;
+			delete window.filterWnMax;
+			renderTableAndLiterature(allRows, litRows);
+		} catch (e) {
+			alert('Error loading files: ' + e.message);
+		}
+	}
+
+	window.addEventListener('DOMContentLoaded', autoLoadFiles);
+
+	// Show description popup for header
+	function showHeaderDescription(header, event) {
+		let norm = s => s.trim().toLowerCase().replace(/\s+/g, '');
+		let key = norm(header);
+		let desc = null;
+		for (const k in beschreibungMap) {
+			if (norm(k) === key) { desc = beschreibungMap[k]; break; }
+		}
+		if (!desc) desc = 'No description available.';
+		let popup = document.getElementById('headerDescPopup');
+		if (!popup) {
+			popup = document.createElement('div');
+			popup.id = 'headerDescPopup';
+			popup.style.position = 'fixed';
+			popup.style.zIndex = '9999';
+			popup.style.background = 'var(--background, #fff)';
+			popup.style.color = 'var(--color, #222)';
+			popup.style.border = '1px solid #888';
+			popup.style.borderRadius = '8px';
+			popup.style.padding = '0.7em 1em';
+			popup.style.boxShadow = '0 2px 12px rgba(0,0,0,0.15)';
+			popup.style.maxWidth = '320px';
+			popup.style.fontSize = '1em';
+			document.body.appendChild(popup);
+		}
+		popup.textContent = desc;
+		const rect = event.target.getBoundingClientRect();
+		popup.style.top = (rect.bottom + 8) + 'px';
+		popup.style.left = (rect.left) + 'px';
+		popup.style.display = 'block';
+		setTimeout(() => {
+			window.addEventListener('mousedown', function hidePopup(e) {
+				if (!popup.contains(e.target)) {
+					popup.style.display = 'none';
+					window.removeEventListener('mousedown', hidePopup);
+				}
+			});
+		}, 0);
+	}
+
+	function runSearch() {
+		const inputVal = document.getElementById('searchInput').value.trim();
+		if (!inputVal || !allRows.length) return;
+		const header = allRows[0];
+		let results = [];
+		const wn = parseFloat(inputVal);
+		if (!isNaN(wn)) {
+			results = allRows.slice(1).filter(row => {
+				const cells = row.split('\t');
+				const num = parseFloat(cells[0]);
+				return !isNaN(num) && num >= wn - 10 && num <= wn + 10;
+			});
+		} else {
+			const catVal = inputVal.toLowerCase();
+			results = allRows.slice(1).filter(row => {
+				const cells = row.split('\t');
+				return (cells[2] && cells[2].toLowerCase().includes(catVal)) ||
+					   (cells[3] && cells[3].toLowerCase().includes(catVal)) ||
+					   (cells[4] && cells[4].toLowerCase().includes(catVal));
+			});
+		}
+		renderTableAndLiterature([header, ...results], litRows);
+	}
+
+	document.getElementById('searchBtn').addEventListener('click', runSearch);
+	const searchInput = document.getElementById('searchInput');
+	const autocompleteList = document.getElementById('autocompleteList');
+
+	function getDropdownBg() { return document.documentElement.getAttribute('data-theme') === 'dark' ? '#000' : '#fff'; }
+	function getDropdownColor() { return document.documentElement.getAttribute('data-theme') === 'dark' ? '#fff' : '#222'; }
+
+	let autocompleteSelectedIdx = -1;
+	searchInput.addEventListener('input', function() {
+		const val = searchInput.value.trim().toLowerCase();
+		if (!val || !autocompleteOptions.length) { autocompleteList.style.display = 'none'; autocompleteSelectedIdx = -1; return; }
+		const matches = autocompleteOptions.filter(opt => opt.toLowerCase().includes(val));
+		autocompleteList.innerHTML = '';
+		autocompleteList.style.background = getDropdownBg();
+		autocompleteList.style.color = getDropdownColor();
+		autocompleteSelectedIdx = -1;
+		if (matches.length) {
+			matches.slice(0, 10).forEach((opt, idx) => {
+				const li = document.createElement('li');
+				const regex = new RegExp(`(${val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+				li.innerHTML = opt.replace(regex, '<b>$1</b>');
+				li.style.padding = '0.1em 1em';
+				li.style.cursor = 'pointer';
+				li.style.background = getDropdownBg();
+				li.style.color = getDropdownColor();
+				li.setAttribute('data-idx', idx);
+				li.addEventListener('mousedown', function(e) {
+					e.preventDefault();
+					searchInput.value = opt;
+					autocompleteList.style.display = 'none';
+					runSearch();
+				});
+				autocompleteList.appendChild(li);
+			});
+			autocompleteList.style.display = '';
+		} else {
+			autocompleteList.style.display = 'none';
+		}
+	});
+
+	searchInput.addEventListener('keydown', function(e) {
+		const items = Array.from(autocompleteList.children);
+		if (autocompleteList.style.display !== 'none' && items.length) {
+			if (e.key === 'ArrowDown') {
+				e.preventDefault();
+				autocompleteSelectedIdx = (autocompleteSelectedIdx + 1) % items.length;
+				items.forEach((li, idx) => {
+					li.style.background = idx === autocompleteSelectedIdx ? '#3399ff' : getDropdownBg();
+					li.style.color = idx === autocompleteSelectedIdx ? '#fff' : getDropdownColor();
+				});
+			} else if (e.key === 'ArrowUp') {
+				e.preventDefault();
+				autocompleteSelectedIdx = (autocompleteSelectedIdx - 1 + items.length) % items.length;
+				items.forEach((li, idx) => {
+					li.style.background = idx === autocompleteSelectedIdx ? '#3399ff' : getDropdownBg();
+					li.style.color = idx === autocompleteSelectedIdx ? '#fff' : getDropdownColor();
+				});
+			} else if (e.key === 'Enter') {
+				e.preventDefault();
+				if (autocompleteSelectedIdx >= 0) {
+					const selectedLi = items[autocompleteSelectedIdx];
+					if (selectedLi) { searchInput.value = selectedLi.textContent; }
+				}
+				autocompleteList.style.display = 'none';
+				if (!searchInput.value.trim()) {
+					document.getElementById('searchResults').innerHTML = '';
+					renderTableAndLiterature(allRows, litRows);
+				} else {
+					runSearch();
+				}
+			}
+		} else if (e.key === 'Enter') {
+			autocompleteList.style.display = 'none';
+			if (!searchInput.value.trim()) {
+				document.getElementById('searchResults').innerHTML = '';
+				renderTableAndLiterature(allRows, litRows);
+			} else {
+				runSearch();
+			}
+		}
+	});
+
+	document.getElementById('clearSearch').addEventListener('click', function() {
+		searchInput.value = '';
+		autocompleteList.style.display = 'none';
+		document.getElementById('searchResults').innerHTML = '';
+		renderTableAndLiterature(allRows, litRows);
+	});
+
+	document.addEventListener('click', function(e) {
+		if (!autocompleteList.contains(e.target) && e.target !== searchInput) {
+			autocompleteList.style.display = 'none';
+		}
+	});
+
+	function renderTableAndLiterature(rows, litRows) {
+		rows = sortRowsByWavenumber(rows);
+		const tableContainer = document.getElementById('tableContainer');
+		tableContainer.innerHTML = '';
+		const table = document.createElement('table');
+		const thead = document.createElement('thead');
+		const tbody = document.createElement('tbody');
+
+		// Remove any previous literature div
+		const oldLitDiv = document.querySelector('div > h3');
+		if (oldLitDiv) { const p = oldLitDiv.closest('div'); if (p && p.parentNode === document.body) p.remove(); }
+
+		let litHeader = [];
+		let litData = {};
+		if (litRows && litRows.length > 1) {
+			litHeader = litRows[0].split('\t').map(h => h.trim().toLowerCase());
+			let authorIdx = litHeader.findIndex(h => h === 'author' || h === 'authors');
+			if (authorIdx === -1) authorIdx = litHeader.findIndex(h => h.includes('author'));
+			let yearIdx = litHeader.findIndex(h => h === 'year');
+			let sourceIdx = litHeader.findIndex(h => h === 'source');
+			let measurementIdx = litHeader.findIndex(h => h === 'measurement');
+			let doiIdx = litHeader.findIndex(h => h === 'doi');
+			litRows.slice(1).forEach(row => {
+				const cells = row.split('\t');
+				const doiRaw = doiIdx !== -1 ? (cells[doiIdx] || '').trim() : '';
+				const doi = normalizeDoi(doiRaw);
+				if (doi) {
+					litData[doi] = {
+						doi,
+						author: authorIdx !== -1 ? (cells[authorIdx] || '').trim() : '',
+						year: yearIdx !== -1 ? (cells[yearIdx] || '').trim() : '',
+						source: sourceIdx !== -1 ? (cells[sourceIdx] || '').trim() : '',
+						measurement: measurementIdx !== -1 ? (cells[measurementIdx] || '').trim() : ''
+					};
+					litHeader.forEach((h, idx) => {
+						if (!(h in litData[doi])) litData[doi][h] = (cells[idx] || '').trim();
+					});
+				}
+			});
+		}
+
+		let litSources = [];
+		let litMap = {};
+		if (rows.length > 1) {
+			rows.slice(1).forEach(row => {
+				const dois = extractDoisFromRow(row);
+				dois.forEach(doi => { if (doi && litData[doi]) litSources.push(litData[doi]); });
+			});
+			litSources = litSources.filter((src, idx, arr) => src.doi && arr.findIndex(s => s.doi === src.doi) === idx);
+			litSources.sort((a, b) => {
+				if (a.author < b.author) return -1;
+				if (a.author > b.author) return 1;
+				return a.year.localeCompare(b.year);
+			});
+			litSources.forEach((src, idx) => { litMap[src.doi] = idx + 1; });
+		}
+
+		// Store for PDF export — always reflects the currently rendered table
+		currentLitSources = litSources.slice();
+
+		rows.forEach((row, i) => {
+			const tr = document.createElement('tr');
+			const cells = row.split('\t');
+			let litNums = [];
+			if (i !== 0) {
+				extractDoisFromRow(row).forEach(doi => {
+					const litNum = litMap[doi];
+					if (litNum && !litNums.includes(litNum)) litNums.push(litNum);
+				});
+			}
+			if (i === 0) {
+				// Wavenumber header spanning 2 cols
+				const th = document.createElement('th');
+				th.colSpan = 2; th.style.textAlign = 'center'; th.classList.add('col-wavenumber');
+				const pill = document.createElement('span'); pill.className = 'th-pill';
+				const flexSpan = document.createElement('span'); flexSpan.className = 'header-flex'; flexSpan.textContent = 'Wavenumber';
+				const descBtn = document.createElement('button');
+				descBtn.title = 'Show description';
+				descBtn.onclick = (event) => showHeaderDescription('Wavenumber', event);
+				descBtn.style.cssText = 'background:transparent;color:var(--accent);border:none;width:1.2em;height:1.2em;font-size:1em;cursor:pointer;margin-left:0.3em;display:inline-flex;align-items:center;justify-content:center;box-shadow:none;padding:0';
+				descBtn.innerHTML = '<svg viewBox="0 0 19 19" fill="none" aria-hidden="true"><circle cx="9.5" cy="9.5" r="8.5" stroke="var(--accent)" stroke-width="1" fill="none"/><text x="9.5" y="10.2" font-size="13" font-family="Inter" fill="var(--accent)" text-anchor="middle" dominant-baseline="middle">?</text></svg>';
+				flexSpan.appendChild(descBtn); pill.appendChild(flexSpan); th.appendChild(pill); tr.appendChild(th);
+
+				for (let j = 2; j <= 5; j++) {
+					const thC = document.createElement('th');
+					if (j === 2) thC.classList.add('col-biomolecule');
+					if (j === 3) thC.classList.add('col-specification');
+					if (j === 4) thC.classList.add('col-component');
+					if (j === 5) thC.classList.add('col-vibration');
+					const pillC = document.createElement('span'); pillC.className = 'th-pill';
+					const flexC = document.createElement('span'); flexC.className = 'header-flex'; flexC.textContent = cells[j] || '';
+					const dBtn = document.createElement('button');
+					dBtn.title = 'Show description';
+					dBtn.onclick = (event) => showHeaderDescription(cells[j], event);
+					dBtn.style.cssText = 'background:transparent;color:var(--accent);border:none;width:1.2em;height:1.2em;font-size:1em;cursor:pointer;margin-left:0.3em;display:inline-flex;align-items:center;justify-content:center;box-shadow:none;padding:0';
+					dBtn.innerHTML = '<svg viewBox="0 0 19 19" fill="none" aria-hidden="true"><circle cx="9.5" cy="9.5" r="8.5" stroke="var(--accent)" stroke-width="1" fill="none"/><text x="9.5" y="10.2" font-size="13" font-family="Inter" fill="var(--accent)" text-anchor="middle" dominant-baseline="middle">?</text></svg>';
+					flexC.appendChild(dBtn); pillC.appendChild(flexC); thC.appendChild(pillC); tr.appendChild(thC);
+				}
+				const thLit = document.createElement('th'); thLit.classList.add('col-literature');
+				const pillLit = document.createElement('span'); pillLit.className = 'th-pill';
+				const flexLit = document.createElement('span'); flexLit.className = 'header-flex'; flexLit.textContent = 'Literature';
+				pillLit.appendChild(flexLit);
+				thLit.appendChild(pillLit); tr.appendChild(thLit);
+
+				for (let j = 17; j <= 18; j++) {
+					const thF = document.createElement('th'); thF.classList.add(j === 17 ? 'col-further1' : 'col-further2');
+					const pillF = document.createElement('span'); pillF.className = 'th-pill'; pillF.textContent = cells[j] || '';
+					thF.appendChild(pillF); tr.appendChild(thF);
+				}
+				thead.appendChild(tr);
+			} else {
+				const tdI = document.createElement('td'); tdI.classList.add('col-intensity');
+				const intensity = (cells[1] || '').toLowerCase();
+				if (intensity === 'strong') tdI.style.backgroundColor = '#901e3e';
+				else if (intensity === 'medium') tdI.style.backgroundColor = '#df6789';
+				else if (intensity === 'weak') tdI.style.backgroundColor = '#f0bac9';
+				tr.appendChild(tdI);
+				const tdWn = document.createElement('td'); tdWn.classList.add('col-wavenumber');
+				tdWn.textContent = cells[0]; tdWn.style.textAlign = 'center'; tr.appendChild(tdWn);
+
+				for (let j = 2; j <= 5; j++) {
+					const td = document.createElement('td');
+					if (j === 2) { td.classList.add('col-biomolecule'); td.style.textAlign = 'center'; }
+					if (j === 3) td.classList.add('col-specification');
+					if (j === 4) td.classList.add('col-component');
+					if (j === 5) td.classList.add('col-vibration');
+					td.innerHTML = cells[j] ?? '';
+					tr.appendChild(td);
+				}
+				const tdLit = document.createElement('td'); tdLit.classList.add('col-literature'); tdLit.style.textAlign = 'center';
+				if (litNums.length) tdLit.innerHTML = litNums.map(num => `<a href="#lit${num}">${num}</a>`).join(', ');
+				tr.appendChild(tdLit);
+
+				const td17 = document.createElement('td'); td17.classList.add('col-further1'); td17.textContent = cells[17] ?? ''; tr.appendChild(td17);
+				const td18 = document.createElement('td'); td18.classList.add('col-further2'); td18.textContent = cells[18] ?? ''; tr.appendChild(td18);
+				tbody.appendChild(tr);
+			}
+		});
+
+		// Default column widths in px (matching CSS defaults approximately)
+		const defaultColWidths = [
+			40,   // 0: intensity
+			152,  // 1: wavenumber
+			120,  // 2: biomolecule
+			224,  // 3: specification
+			200,  // 4: component
+			288,  // 5: vibration
+			104,  // 6: literature
+			250,  // 7: further1
+			250   // 8: further2
+		];
+
+		const colgroup = document.createElement('colgroup');
+		defaultColWidths.forEach(function(w) {
+			const col = document.createElement('col');
+			col.style.width = w + 'px';
+			colgroup.appendChild(col);
+		});
+		table.appendChild(colgroup);
+		table.appendChild(thead);
+		table.appendChild(tbody);
+		tableContainer.appendChild(table);
+
+		// Add resize handles to header cells
+		requestAnimationFrame(function() {
+			const ths = thead.querySelectorAll('th');
+			const cols = colgroup.querySelectorAll('col');
+			let colIdx = 0;
+			ths.forEach(function(th, thIdx) {
+				const span = parseInt(th.getAttribute('colspan') || '1', 10);
+				const myStartCol = colIdx;
+				const lastColForTh = colIdx + span - 1;
+				const handle = document.createElement('div');
+				handle.className = 'col-resize-handle';
+				handle.addEventListener('mousedown', function(e) {
+					e.preventDefault();
+					e.stopPropagation();
+					handle.classList.add('active');
+					document.body.classList.add('col-resizing');
+					var startX = e.clientX;
+					// Read actual rendered width of the th
+					var startWidth = th.getBoundingClientRect().width;
+					function onMove(ev) {
+						var diff = ev.clientX - startX;
+						var newWidth = Math.max(30, startWidth + diff);
+						// Distribute across spanned cols proportionally
+						var perCol = newWidth / span;
+						for (var ci = myStartCol; ci <= lastColForTh; ci++) {
+							cols[ci].style.width = Math.max(20, Math.round(perCol)) + 'px';
+						}
+					}
+					function onUp() {
+						handle.classList.remove('active');
+						document.body.classList.remove('col-resizing');
+						document.removeEventListener('mousemove', onMove);
+						document.removeEventListener('mouseup', onUp);
+					}
+					document.addEventListener('mousemove', onMove);
+					document.addEventListener('mouseup', onUp);
+				});
+				th.appendChild(handle);
+				colIdx += span;
+			});
+		});
+
+		if (litSources.length) {
+			const litDiv = document.createElement('div');
+			litDiv.innerHTML = '<h3>Literature</h3>';
+			litDiv.style.marginLeft = '2em';
+			const litTable = document.createElement('table');
+			litTable.style.marginTop = '1em'; litTable.style.width = 'auto'; litTable.style.borderCollapse = 'collapse';
+			const litThead = document.createElement('thead');
+			const trHead = document.createElement('tr');
+			['#', 'Citation (APA)', 'Source', 'Measurement'].forEach(h => {
+				const th = document.createElement('th'); th.textContent = h;
+				th.style.padding = '0.5em 1em'; th.style.borderBottom = '1px solid #888';
+				trHead.appendChild(th);
+			});
+			litThead.appendChild(trHead); litTable.appendChild(litThead);
+			const litTbody = document.createElement('tbody');
+
+			async function fetchAPACitation(doi, fallback) {
+				try {
+					const url = `https://api.crossref.org/works/${encodeURIComponent(doi)}`;
+					const res = await fetch(url);
+					if (!res.ok) throw new Error('Not found');
+					const data = await res.json();
+					const item = data.message;
+					let authors = '';
+					if (item.author && item.author.length) {
+						authors = item.author.map(a => { let n = ''; if (a.family) n += a.family; if (a.given) n += ', ' + a.given[0] + '.'; return n; }).join(', ');
+					}
+					let year = (item.issued && item.issued['date-parts'] && item.issued['date-parts'][0][0]) || '';
+					let title = (item.title && item.title[0]) || '';
+					let journal = (item['container-title'] && item['container-title'][0]) || '';
+					let volume = item.volume || ''; let issue = item.issue || ''; let pages = item.page || '';
+					let doiUrl = doi ? `https://doi.org/${doi}` : '';
+					let apa = `${authors} (${year}). ${title}. ${journal}`;
+					if (volume) apa += `, ${volume}`; if (issue) apa += `(${issue})`; if (pages) apa += `, ${pages}`;
+					apa += `. ${doiUrl}`;
+					return apa;
+				} catch (e) {
+					let apa = '';
+					if (fallback.author) apa += fallback.author;
+					if (fallback.year) apa += ` (${fallback.year})`;
+					if (fallback.source) apa += `. ${fallback.source}`;
+					if (fallback.doi) apa += `. https://doi.org/${fallback.doi}`;
+					return apa.replace(/^\. /, '').replace(/\s*\.+/g, '.');
+				}
+			}
+
+			(async function() {
+				resolvedLitForPdf = []; // Reset
+				for (let idx = 0; idx < litSources.length; idx++) {
+					const src = litSources[idx];
+					const tr = document.createElement('tr'); tr.id = `lit${idx + 1}`;
+					const tdNum = document.createElement('td'); tdNum.textContent = idx + 1; tdNum.style.textAlign = 'center'; tdNum.style.padding = '0.5em 1em'; tr.appendChild(tdNum);
+					const tdCitation = document.createElement('td'); tdCitation.style.padding = '0.5em 1em';
+					let citation;
+					if (resolvedCitationsByDoi[src.doi]) {
+						citation = resolvedCitationsByDoi[src.doi];
+					} else {
+						citation = await fetchAPACitation(src.doi, src);
+						resolvedCitationsByDoi[src.doi] = citation;
+					}
+					resolvedLitForPdf.push({ num: idx + 1, citation: citation, source: src.source || '', measurement: src.measurement || '' });
+					const spanCitation = document.createElement('span'); spanCitation.textContent = citation; tdCitation.appendChild(spanCitation);
+					if (src.doi) {
+						const crossrefBtn = document.createElement('a');
+						crossrefBtn.href = `https://www.crossref.org/search/?q=${encodeURIComponent(src.doi)}`; crossrefBtn.target = '_blank'; crossrefBtn.rel = 'noopener noreferrer';
+						crossrefBtn.textContent = 'CrossRef'; crossrefBtn.style.marginLeft = '1em'; crossrefBtn.style.fontSize = '0.9em'; crossrefBtn.style.textDecoration = 'underline';
+						tdCitation.appendChild(crossrefBtn);
+						const gsBtn = document.createElement('a');
+						gsBtn.href = `https://scholar.google.com/scholar?q=${encodeURIComponent(src.doi)}`; gsBtn.target = '_blank'; gsBtn.rel = 'noopener noreferrer';
+						gsBtn.textContent = 'Google Scholar'; gsBtn.style.marginLeft = '0.5em'; gsBtn.style.fontSize = '0.9em'; gsBtn.style.textDecoration = 'underline';
+						tdCitation.appendChild(gsBtn);
+					}
+					tr.appendChild(tdCitation);
+					const tdSource = document.createElement('td'); tdSource.textContent = src.source || ''; tdSource.style.padding = '0.5em 1em'; tr.appendChild(tdSource);
+					const tdMeas = document.createElement('td'); tdMeas.textContent = src.measurement || ''; tdMeas.style.padding = '0.5em 1em'; tr.appendChild(tdMeas);
+					litTbody.appendChild(tr);
+				}
+				litTable.appendChild(litTbody);
+				litDiv.appendChild(litTable);
+				document.body.appendChild(litDiv);
+			})();
+		}
+	}
+
+	// Theme toggle
+	const themeToggleBtn = document.getElementById('themeToggle');
+	function setTheme(isDark) {
+		document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+		document.getElementById('sunIcon').style.display = isDark ? '' : 'none';
+		document.getElementById('moonIcon').style.display = isDark ? 'none' : '';
+		document.getElementById('moonIcon').style.stroke = isDark ? '' : '#000';
+		document.getElementById('downloadBtn').style.color = isDark ? '' : '#000';
+		document.getElementById('clearSearch').style.color = isDark ? '' : '#000';
+	}
+	let isDark = true;
+	setTheme(isDark);
+	themeToggleBtn.addEventListener('click', function() {
+		isDark = !isDark;
+		setTheme(isDark);
+		if (autocompleteList.style.display !== 'none') {
+			autocompleteList.style.background = getDropdownBg();
+			autocompleteList.style.color = getDropdownColor();
+			Array.from(autocompleteList.children).forEach(li => { li.style.background = getDropdownBg(); li.style.color = getDropdownColor(); });
+		}
+	});
+	</script>
+
+	<!-- Dynamically set sticky thead top to match search bar height -->
+	<script>
+	function updateStickyHeaderOffset() {
+		const searchBar = document.getElementById('searchBarRow');
+		const thead = document.querySelector('#tableContainer table thead');
+		if (searchBar && thead) {
+			thead.style.top = searchBar.offsetHeight + 'px';
+		}
+	}
+	window.addEventListener('resize', updateStickyHeaderOffset);
+	const _origRender = renderTableAndLiterature;
+	renderTableAndLiterature = function() {
+		_origRender.apply(this, arguments);
+		requestAnimationFrame(updateStickyHeaderOffset);
+	};
+	</script>
+	<!-- Filter menu logic -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		function populateWavenumberSlider() {
+			const sliderElem = document.getElementById('wnSlider');
+			const { min, max } = getWavenumberRange();
+			let currentMin = Math.max(min, Math.min(window.filterWnMin ?? min, max));
+			let currentMax = Math.max(min, Math.min(window.filterWnMax ?? max, max));
+			if (sliderElem && !sliderElem.noUiSlider) {
+				noUiSlider.create(sliderElem, {
+					start: [currentMin, currentMax], connect: true, range: { min, max }, step: 1,
+					tooltips: [true, true],
+					format: { to: v => Math.round(v), from: v => Number(v) }
+				});
+				sliderElem.noUiSlider.on('update', function(values) { window.filterWnMin = Number(values[0]); window.filterWnMax = Number(values[1]); });
+				sliderElem.noUiSlider.on('change', function() { filterByBiomoleculeAndSpec(); });
+			} else if (sliderElem && sliderElem.noUiSlider) {
+				sliderElem.noUiSlider.updateOptions({ range: { min, max }, start: [currentMin, currentMax] }, true);
+			}
+		}
+
+		function populateFilterOptions() {
+			populateWavenumberSlider();
+			const biomoleculeOptions = document.getElementById('biomoleculeOptions');
+			if (!biomoleculeOptions) return;
+			biomoleculeOptions.innerHTML = '';
+			const biomolSpecs = {};
+			allRows.slice(1).forEach(row => {
+				const cells = row.split('\t');
+				const biomol = cells[2]?.trim(); const spec = cells[3]?.trim();
+				if (biomol) { if (!biomolSpecs[biomol]) biomolSpecs[biomol] = new Set(); if (spec) biomolSpecs[biomol].add(spec); }
+			});
+			Object.keys(biomolSpecs).sort().forEach(biomol => {
+				const biomolId = 'bio_' + biomol.replace(/\W/g, '');
+				const specs = Array.from(biomolSpecs[biomol]).sort();
+				biomoleculeOptions.innerHTML += `
+					<div class="biomol-group" style="margin-bottom:0.5em;">
+						<span class="biomol-arrow" style="cursor:pointer;user-select:none;font-size:1.1em;margin-right:0.3em;display:inline-block;width:1em;height:1em;vertical-align:middle;">
+							<svg class="arrow-svg" width="1em" height="1em" viewBox="0 0 16 16" style="display:block;"><polygon points="4,3 12,8 4,13" fill="#666"/></svg>
+						</span>
+						<label style="margin-right:1em;font-weight:500;display:inline-block;min-width:120px;">${biomol}</label>
+						<span style="float:right;"><input type="checkbox" value="${biomol}" id="${biomolId}" checked></span>
+						<div class="spec-list" style="display:none;margin-left:2em;margin-top:0.2em;">
+							${specs.map(spec => { const specId = 'spec_' + spec.replace(/\W/g, ''); return `<label style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.2em;min-width:120px;"><span>${spec}</span><input type="checkbox" value="${spec}" id="${specId}" checked></label>`; }).join('')}
+						</div>
+					</div>`;
+			});
+			setTimeout(() => {
+				document.querySelectorAll('.biomol-group .biomol-arrow').forEach(arrow => {
+					arrow.addEventListener('click', function() {
+						const specList = this.parentElement.querySelector('.spec-list');
+						if (specList.style.display === 'none') { specList.style.display = 'block'; this.querySelector('.arrow-svg').style.transform = 'rotate(90deg)'; }
+						else { specList.style.display = 'none'; this.querySelector('.arrow-svg').style.transform = 'rotate(0deg)'; }
+					});
+				});
+				document.querySelectorAll('.biomol-group input[type="checkbox"][id^="bio_"]').forEach(box => {
+					box.addEventListener('change', function() {
+						const group = this.closest('.biomol-group');
+						const specList = group.querySelector('.spec-list');
+						if (specList) specList.querySelectorAll('input[type="checkbox"][id^="spec_"]').forEach(sb => { sb.checked = this.checked; });
+						filterByBiomoleculeAndSpec();
+					});
+				});
+				document.querySelectorAll('.biomol-group .spec-list input[type="checkbox"][id^="spec_"]').forEach(box => {
+					box.addEventListener('change', function() { filterByBiomoleculeAndSpec(); });
+				});
+			}, 200);
+		}
+
+		const filterBtn = document.getElementById('filterBtn');
+		const filterMenu = document.getElementById('filterMenu');
+		if (filterBtn && filterMenu) {
+			filterBtn.addEventListener('click', function() {
+				filterMenu.style.display = 'block';
+				const rect = filterBtn.getBoundingClientRect();
+				filterMenu.style.position = 'absolute';
+				filterMenu.style.top = (rect.bottom - (4.5 * parseFloat(getComputedStyle(document.documentElement).fontSize))) + 'px';
+				filterMenu.style.left = rect.left + 'px';
+				filterMenu.style.right = ''; filterMenu.style.marginTop = '0'; filterMenu.style.marginLeft = '0';
+				populateFilterOptions();
+			});
+		}
+		document.addEventListener('mousedown', function(e) {
+			if (filterMenu && filterMenu.style.display === 'block' && !filterMenu.contains(e.target) && e.target !== filterBtn) {
+				filterMenu.style.display = 'none';
+			}
+		});
+	});
+	</script>
+
+	<!-- Download menu logic -->
+	<script>
+	document.addEventListener('DOMContentLoaded', function() {
+		const downloadBtn = document.getElementById('downloadBtn');
+		const downloadMenu = document.getElementById('downloadMenu');
+		const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+		const downloadTxtBtn = document.getElementById('downloadTxtBtn');
+
+		function closeMenu() { if (downloadMenu) downloadMenu.style.display = 'none'; }
+		function toggleMenu() {
+			if (!downloadMenu) return;
+			downloadMenu.style.display = (downloadMenu.style.display === 'flex') ? 'none' : 'flex';
+		}
+		if (downloadBtn) downloadBtn.addEventListener('click', function(e) { e.preventDefault(); e.stopPropagation(); toggleMenu(); });
+		document.addEventListener('mousedown', function(e) {
+			if (!downloadMenu || downloadMenu.style.display !== 'flex') return;
+			if (downloadMenu.contains(e.target) || e.target === downloadBtn) return;
+			closeMenu();
+		});
+
+		function loadScript(src) {
+			return new Promise(function(resolve, reject) {
+				if (document.querySelector('script[src="' + src + '"]')) return resolve();
+				var s = document.createElement('script');
+				s.src = src;
+				s.onload = resolve;
+				s.onerror = function() { reject(new Error('Failed to load: ' + src)); };
+				document.body.appendChild(s);
+			});
+		}
+
+		function insertSoftBreaks(str) {
+			if (!str) return str;
+			return str.replace(/\S{20,}/g, function(match) {
+				var result = match.replace(/([\/._\-:;,=&?#])/g, '$1\u200B');
+				result = result.replace(new RegExp('([^\u200B]{20})', 'g'), '$1\u200B');
+				return result;
+			});
+		}
+
+		// Wrap text using \u200B as explicit break opportunities (more reliable than splitTextToSize alone)
+		function wrapTextToWidth(pdf, text, maxWidth) {
+			if (!text) return [''];
+			var t = String(text);
+			var parts = t.split('\u200B'); // explicit break tokens we inserted
+			var lines = [];
+			var line = '';
+
+			function flush() {
+				if (line !== '') lines.push(line);
+				line = '';
+			}
+
+			for (var i = 0; i < parts.length; i++) {
+				var token = parts[i];
+				if (!token) continue;
+
+				// If token itself is wider than the cell, fallback to jsPDF splitting for that token
+				if (pdf.getTextWidth(token) > maxWidth) {
+					flush();
+					var hard = pdf.splitTextToSize(token, maxWidth);
+					for (var h = 0; h < hard.length; h++) lines.push(hard[h]);
+					continue;
+				}
+
+				var candidate = line ? (line + token) : token;
+				if (pdf.getTextWidth(candidate) <= maxWidth) {
+					line = candidate;
+				} else {
+					flush();
+					line = token;
+				}
+			}
+			flush();
+			return lines.length ? lines : [''];
+		}
+
+		// MISSING in current file state (exportTxt/exportPdf call these)
+		function isVisible(cell) {
+			var style = window.getComputedStyle(cell);
+			return style.display !== 'none' && style.visibility !== 'hidden' && cell.offsetParent !== null;
+		}
+
+		function intensityNameFromBg(bg) {
+			if (!bg) return '';
+			var rgb = bg.match(/\d+/g);
+			if (!rgb || rgb.length < 3) return '';
+			var r = parseInt(rgb[0], 10), g = parseInt(rgb[1], 10), b = parseInt(rgb[2], 10);
+			if (r === 144 && g === 30 && b === 62) return 'strong';
+			if (r === 223 && g === 103 && b === 137) return 'medium';
+			if (r === 240 && g === 186 && b === 201) return 'weak';
+			return '';
+		}
+
+		function exportTxt() {
+			var table = document.querySelector('#tableContainer table');
+			if (!table) return alert('No table found to export.');
+			var thead = table.querySelector('thead');
+			var tbody = table.querySelector('tbody');
+			if (!thead || !tbody) return alert('Export requires a rendered table.');
+			var firstBodyRow = tbody.querySelector('tr');
+			var bodyColCount = firstBodyRow ? firstBodyRow.querySelectorAll('td').length : 0;
+			if (!bodyColCount) return alert('No data rows to export.');
+
+			var ths = Array.from(thead.querySelectorAll('th')).filter(isVisible);
+			var headers = [];
+			ths.forEach(function(th) {
+				var text = th.innerText.replace('?', '').trim();
+				var span = parseInt(th.getAttribute('colspan') || '1', 10);
+				headers.push(text);
+				for (var s = 1; s < span; s++) headers.push('');
+			});
+			headers = headers.slice(0, bodyColCount);
+			while (headers.length < bodyColCount) headers.push('');
+			headers[0] = 'Intensity';
+			var lines = [headers.join('\t')];
+			Array.from(tbody.querySelectorAll('tr')).forEach(function(tr) {
+				var tds = Array.from(tr.querySelectorAll('td'));
+				var out = [];
+				for (var c = 0; c < bodyColCount; c++) {
+					var td = tds[c];
+					if (!td) { out.push(''); continue; }
+					if (c === 0) out.push(intensityNameFromBg(window.getComputedStyle(td).backgroundColor));
+					else out.push((td.innerText || '').trim());
+				}
+				lines.push(out.join('\t'));
+			});
+			var blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+			var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+			var searchTerm = (document.getElementById('searchInput').value.trim()) || 'results';
+			a.download = 'RamanData_' + searchTerm + '.txt';
+			document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+		}
+
+		async function exportPdf() {
+			var table = document.querySelector('#tableContainer table');
+			if (!table) return alert('No table found to export.');
+			var thead = table.querySelector('thead');
+			var tbody = table.querySelector('tbody');
+			if (!thead || !tbody) return alert('Export requires a rendered table.');
+			var firstBodyRow = tbody.querySelector('tr');
+			var bodyColCount = firstBodyRow ? firstBodyRow.querySelectorAll('td').length : 0;
+			if (!bodyColCount) return alert('No data rows to export.');
+
+			try {
+				await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+				await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.7.0/jspdf.plugin.autotable.min.js');
+
+				var jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
+				if (!jsPDFCtor) return alert('jsPDF failed to load.');
+				var pdf = new jsPDFCtor({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+				if (typeof pdf.autoTable !== 'function') {
+					if (window.jspdf && typeof window.jspdf.autoTable === 'function') jsPDFCtor.prototype.autoTable = window.jspdf.autoTable;
+					else if (typeof window.autoTable === 'function') jsPDFCtor.prototype.autoTable = window.autoTable;
+					pdf = new jsPDFCtor({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+				}
+				if (typeof pdf.autoTable !== 'function') return alert('autoTable failed to load.');
+
+				var ths = Array.from(thead.querySelectorAll('th')).filter(isVisible);
+				var headRow = [];
+				ths.forEach(function(th) {
+					var text = th.innerText.replace('?', '').trim();
+					var span = parseInt(th.getAttribute('colspan') || '1', 10);
+					headRow.push(text); for (var s = 1; s < span; s++) headRow.push('');
+				});
+				headRow = headRow.slice(0, bodyColCount);
+				while (headRow.length < bodyColCount) headRow.push('');
+				if (headRow.length >= 1) headRow[0] = '';
+				if (headRow.length >= 2) headRow[1] = 'Wavenumber';
+
+				var bodyRows = [], cellColors = [];
+				Array.from(tbody.querySelectorAll('tr')).forEach(function(tr) {
+					var tds = Array.from(tr.querySelectorAll('td'));
+					var row = [], colors = [];
+					for (var c = 0; c < bodyColCount; c++) {
+						var td = tds[c];
+						row.push(td ? (td.innerText || '').trim() : '');
+						colors.push(c === 0 && td ? window.getComputedStyle(td).backgroundColor : null);
+					}
+					bodyRows.push(row); cellColors.push(colors);
+				});
+
+				var pageWidth = 802;
+				var mainColWidths = {
+					0: 8, 1: 48, 2: 55, 3: 65, 4: 75, 5: 110, 6: 28, 7: 200, 8: 200
+				};
+
+				pdf.autoTable({
+					head: [headRow],
+					body: bodyRows,
+					theme: 'grid',
+					styles: { textColor: [0,0,0], fontSize: 7, overflow: 'linebreak', cellPadding: 3, cellWidth: 'wrap' },
+					headStyles: { fillColor: [255,255,255], textColor: [0,0,0], fontStyle: 'bold' },
+					margin: { top: 20, left: 20, right: 20 },
+					tableWidth: pageWidth,
+					columnStyles: {
+						0: { cellWidth: mainColWidths[0] }, 1: { cellWidth: mainColWidths[1] },
+						2: { cellWidth: mainColWidths[2] }, 3: { cellWidth: mainColWidths[3] },
+						4: { cellWidth: mainColWidths[4] }, 5: { cellWidth: mainColWidths[5] },
+						6: { cellWidth: mainColWidths[6] }, 7: { cellWidth: mainColWidths[7] },
+						8: { cellWidth: mainColWidths[8] }
+					},
+					didParseCell: function(data) {
+						if (data.section === 'body' && data.column.index === 0) {
+							data.cell.text = [''];
+							var bg = cellColors[data.row.index] && cellColors[data.row.index][0];
+							var rgb = bg ? bg.match(/\d+(\.\d+)?/g) : null;
+							var isTransparent = (bg && bg.startsWith('rgba') && rgb && rgb.length >= 4) ? (parseFloat(rgb[3]) === 0) : false;
+							if (!bg || bg === 'transparent' || isTransparent) { delete data.cell.styles.fillColor; return; }
+							if (rgb && rgb.length >= 3) data.cell.styles.fillColor = [parseInt(rgb[0]), parseInt(rgb[1]), parseInt(rgb[2])];
+							else delete data.cell.styles.fillColor;
+						}
+					},
+					willDrawCell: function(data) {
+						if (data.section !== 'body' && data.section !== 'head') return;
+						if (data.column.index === 0) return;
+						var innerW = (data.cell && typeof data.cell.width === 'number' ? data.cell.width : mainColWidths[data.column.index]) - 6;
+						if (!innerW || innerW <= 10) return;
+						var text = insertSoftBreaks((data.cell.text || []).join(' ')).trim();
+						if (!text) return;
+						pdf.setFontSize(data.cell.styles.fontSize ||  7);
+						data.cell.text = wrapTextToWidth(pdf, text, innerW);
+					}
+				});
+
+				// Literature page — built from currentLitSources (matches displayed table)
+				if (currentLitSources && currentLitSources.length > 0) {
+					var litHeaders = ['#', 'Citation (APA)', 'Source', 'Measurement'];
+					var litBody = currentLitSources.map(function(src, idx) {
+						var citation = resolvedCitationsByDoi[src.doi] || '';
+						if (!citation) {
+							// Fallback: build from available fields
+							var parts = [];
+							if (src.author) parts.push(src.author);
+							if (src.year) parts.push('(' + src.year + ')');
+							if (src.source) parts.push(src.source);
+							if (src.doi) parts.push('https://doi.org/' + src.doi);
+							citation = parts.join('. ');
+						}
+						return [String(idx + 1), citation, src.source || '', src.measurement || ''];
+					});
+
+					pdf.addPage();
+					pdf.setFontSize(14);
+					pdf.text('Literature', 20, 30);
+
+					var litColWidths = { 0:  22, 1: 620, 2: 75, 3: 75 };
+
+					pdf.autoTable({
+						head: [litHeaders],
+						body: litBody,
+						theme: 'grid',
+						styles: { textColor: [0,0,0], fontSize: 6, overflow: 'linebreak', cellPadding: 3, cellWidth: 'wrap' },
+						headStyles: { fillColor: [255,255,255], textColor: [0,0,0], fontStyle: 'bold' },
+						margin: { top: 40, left: 20, right: 20 },
+						tableWidth: pageWidth,
+						columnStyles: {
+							0: { cellWidth: litColWidths[0] }, 1: { cellWidth: litColWidths[1] },
+							2: { cellWidth: litColWidths[2] }, 3: { cellWidth: litColWidths[3] }
+						},
+						willDrawCell: function(data) {
+							if (data.section !== 'body' && data.section !== 'head') return;
+							if (data.column.index === 0) return; // color bar
+							var innerW = (data.cell && typeof data.cell.width === 'number' ? data.cell.width : litColWidths[data.column.index]) - 6;
+							if (!innerW || innerW <= 10) return;
+							var text = insertSoftBreaks((data.cell.text || []).join(' ')).trim();
+							if (!text) return;
+							pdf.setFontSize(data.cell.styles.fontSize || 6);
+							data.cell.text = wrapTextToWidth(pdf, text, innerW);
+						}
+					});
+
+				}
+
+				var searchTerm = (document.getElementById('searchInput').value.trim()) || 'results';
+				pdf.save('RamanData_' + searchTerm + '.pdf');
+			} catch (err) {
+				console.error('PDF export failed:', err && err.message ? err.message : err);
+				if (err && err.stack) console.error(err.stack);
+				alert('PDF export failed. Check console.');
+			}
+		}
+
+		if (downloadPdfBtn) downloadPdfBtn.addEventListener('click', function() { closeMenu(); exportPdf(); });
+		if (downloadTxtBtn) downloadTxtBtn.addEventListener('click', function() { closeMenu(); exportTxt(); });
+	});
+	</script>
+
+	<script>
+		window.addEventListener('error', function(e) {
+			console.error('Runtime error:', e.message, e.filename + ':' + e.lineno + ':' + e.colno);
+		});
+	</script>
+</body>
+</html>

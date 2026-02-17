@@ -1,0 +1,88 @@
+=CH	adenine		
+acyl chain	cytosine		=CH
+aromatic ring 	deoxyribose		acyl chain
+C=C	guanine		aromatic ring 
+C=O	OPO		C=C
+C=O-C	phosphodiester linkage		C=O
+C-C	PO2-		C=O-C
+C-C backbone	POP 		C-C
+C-C-C	pyrimidine ring		C-C backbone
+CCH	thymine		C-C-C
+C-CH			CCH
+C-CH3			C-CH
+C-C-N			C-CH3
+CCO			C-C-N
+C-H			CCO
+CH2			C-H
+CH2/CH3			CH2
+CH3			CH2/CH3
+CH3CH2			CH3
+cholesterol			CH3CH2
+C-N			cholesterol
+C-N-C			C-N
+CO			C-N-C
+CO32-			CO
+C-O-C			CO32-
+COH			C-O-C
+coiled conformation			COH
+COO-			coiled conformation
+COOH			COO-
+C-O-S			COOH
+C-S			C-O-S
+desmosine			C-S
+ethanolamine			desmosine
+glycerol			ethanolamine
+heme C-bonds			glycerol
+hydroxyproline			heme C-bonds
+indole ring			hydroxyproline
+inositol			indole ring
+methylene			inositol
+N+(CH3)3 (choline)			methylene
+N-C=O			N+(CH3)3 (choline)
+NCH			N-C=O
+N-C-S			NCH
+NH2			N-C-S
+NH3			NH2
+OCO-			NH3
+-OH			OCO-
+OSO3-			-OH
+palmitic acid			OSO3-
+phenol ring			palmitic acid
+phenyl ring 			phenol ring
+phenylalanine			phenyl ring 
+phosphodiester linkage			phenylalanine
+PO			phosphodiester linkage
+PO43- 			PO
+proline			PO43- 
+pyrrole 			proline
+ring			pyrrole 
+serine			ring
+side chain			serine
+SO3-			side chain
+S-S			SO3-
+sugar ring			S-S
+tyrosine			sugar ring
+? conformation (secondary structure)			tyrosine
+? conformation (secondary structure)			? conformation (secondary structure)
+? turns (secondary structure)			? conformation (secondary structure)
+			? turns (secondary structure)
+			adenine
+			cytosine
+			deoxyribose
+			guanine
+			OPO
+			phosphodiester linkage
+			PO2-
+			POP 
+			pyrimidine ring
+			thymine
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
