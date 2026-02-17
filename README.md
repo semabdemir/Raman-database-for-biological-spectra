@@ -9,11 +9,3 @@ To use the interactive database:
 
 The database is now ready to use!
 
-
-Too narrow down your search:
-1.	Enter a search term or wavenumber into the search bar and press enter
-a.	-abc: excludes these characters from your search
-b.	Abc; def: searches for abc or def
-c.	Abc + def: searches for abc and def
-2.	Use the filter button
-a.	Sliding bar: 
